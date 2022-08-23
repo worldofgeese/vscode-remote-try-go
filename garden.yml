@@ -1,0 +1,13 @@
+kind: Module
+type: container
+name: vscode-remote-try-go
+dockerfile: Dockerfile
+services:
+  - name: frontend
+    ports: 
+      - name: http
+        containerPort: 8081
+    ingresses:
+      - port: http
+        annotations:
+          kubernetes.io/ingress.class: "nginx"

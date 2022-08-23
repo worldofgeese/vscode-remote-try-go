@@ -3,6 +3,17 @@
 ARG VARIANT=1-bullseye
 FROM mcr.microsoft.com/vscode/devcontainers/go:0-${VARIANT}
 
+ENV PATH=/home/vscode/.garden/bin:${PATH}
+
+# Install Garden
+RUN su vscode -c "curl -sL https://get.garden.io/install.sh | bash"
+
+# Script copies localhost's ~/.kube/config file into the container and swaps out 
+# localhost for host.docker.internal on bash/zsh start to keep them in sync.
+COPY copy-kube-config.sh /usr/local/share/
+RUN chown ${USERNAME}:root /usr/local/share/copy-kube-config.sh \
+    && echo "source /usr/local/share/copy-kube-config.sh" | tee -a /root/.bashrc /root/.zshrc /home/${USERNAME}/.bashrc >> /home/${USERNAME}/.zshrc
+
 # [Choice] Node.js version: lts/*, 16, 14, 12, 10
 ARG NODE_VERSION="lts/*"
 RUN if [ "${NODE_VERSION}" != "none" ]; then su vscode -c ". /usr/local/share/nvm/nvm.sh && nvm install ${NODE_VERSION} 2>&1"; fi
